@@ -1,0 +1,11 @@
+    .overlay{
+        font-family: monospace;
+        font-size: 20px;
+        color: black;
+        text-decoration: none;
+        display: block;
+        margin-left: 160px;
+    }
+    .overlay a:hover{
+        color: #a41515;
+    }

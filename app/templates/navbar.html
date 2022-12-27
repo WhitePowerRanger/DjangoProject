@@ -1,0 +1,77 @@
+<html lang="en">
+<head>
+    {% load static %}
+    <style>
+            .sidenav{
+                height: 100%;
+                width: 160px;
+                position: fixed;
+                font-family: monospace;
+                z-index: 1;
+                top: 0;
+                left: 0;
+                background-color: #000000;
+                overflow-x: hidden;
+                padding-top: 20px;
+
+            }
+            .sidenav a{
+                padding: 6px 16px 6px 16px;
+                text-decoration: none;
+                font-size: 25px;
+                color: #818181;
+                display: block;
+            }
+            .sidenav a:hover{
+                color: #a41515;
+            }
+            .center{
+                display: block;
+                margin-left: auto;
+                margin-right: auto;
+                height: 60%;
+                width: 60%;
+            }
+            .authentication-logic{
+                position: absolute;
+                bottom: 30px;
+
+            }
+            .hello-msg{
+                color: #84fab0;
+                font-size: 20px;
+                padding-left: 16px;
+            }
+    </style>
+    <title></title>
+</head>
+<body>
+    <div class="sidenav">
+        <a class="navbar-brand" href="/pizza">
+            <div class="logo-image">
+                <img src="{% static 'img/logo.jpg' %}" alt="pizza_logo" class="center">
+            </div>
+        </a>
+        <a href="/pizza/">Home</a>
+        <a href="/pizza/order/">Order</a>
+        <a href="/pizza/menu/">Menu</a>
+        <a href="/pizza/about-us/">About us</a>
+
+        <div class="authentication-logic">
+            {% if request.user.is_authenticated %}
+                <span class="hello-msg">Hello, {{ request.user }}</span>
+                <span> <a href="{% url 'logout' %}">Logout</a> </span>
+            {% else %}
+                <div class="button-login">
+                    <a href="login">Login</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div id="content" class="main">
+    {% block content %}
+    {% endblock %}
+    </div>
+</body>
+</html>

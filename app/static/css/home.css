@@ -1,0 +1,7 @@
+.bg-image{
+    background-color: #006b1b;
+    background-image: url("../img/home_background.jpg");
+    height: 100vh;
+    background-repeat: no-repeat;
+    background-position: center;
+}

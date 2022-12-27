@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Cities</title>
+</head>
+<body>
+    <div>
+        {% for city in cities %}
+            <div>
+                <a href="http://127.0.0.1:8000/app-pizza/create/{{ city }}"> {{ city }}</a>
+            </div>
+        {% endfor %}
+    </div>
+</body>
+</html>

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Order</title>
+
+
+</head>
+<div>
+    {% include 'home_page/../navbar.html' %}
+</div>
+<link rel="stylesheet" href="../../static/css/order.css">
+
+<body>
+    <div class="overlay">
+        {% for city, restaurants in cities_restaurants.items %}
+            {% for restaurant in restaurants %}
+            <div>
+                {{ city.city_name }}
+            </div>
+            <a href="http://127.0.0.1:8000/app/{{ city.city_name }}/{{ restaurant.restaurant_name }}" class="restaurant">
+                {{ restaurant.restaurant_name }}
+            </a>
+            <div>
+                {{ restaurant.adress }}
+            </div>
+                <br>
+                <br>
+
+            {% endfor %}
+        {% endfor %}
+    </div>
+</body>
+</html>
