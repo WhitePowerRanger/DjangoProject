@@ -1,9 +1,11 @@
 from .forms import MealForm, MealFormSave, CreateUserForm
-from .models import City, Restaurant
+from .models import City, Restaurant, RestaurantAdress
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+
+from .utils import create_google_maps_link
 
 
 def register_page(request):
@@ -89,11 +91,18 @@ def order(request):
     cities_restaurants = {}
     cities = City.objects.all()
     for city_obj in cities:
-        restaurant_obj = Restaurant.objects.get(city_name=city_obj.id)
-        cities_restaurants.setdefault(city_obj, []).append(restaurant_obj)
+        restaurant_obj = Restaurant.objects.get(city=city_obj.id)
+        adress_obj = RestaurantAdress.objects.get(restaurant=restaurant_obj.id)
+        google_link = create_google_maps_link(adress_obj)
+        cities_restaurants[city_obj] = {restaurant_obj: {adress_obj.__str__(): google_link}}
+        # cities_restaurants.setdefault(city_obj, []).append(restaurant_obj)
 
     return render(
         request,
         "order_page/order.html",
-        context={"cities_restaurants": cities_restaurants},
+        context={
+            "cities_restaurants": cities_restaurants,
+        },
     )
+
+
