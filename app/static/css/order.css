@@ -1,0 +1,28 @@
+    .overlay{
+        text-decoration: none;
+        display: block;
+        margin-left: 160px;
+        margin-top: 0px;
+    }
+    .restaurant{
+        font-family: monospace;
+        font-size: 30px;
+        text-transform: uppercase;
+    }
+    .restaurant:link{
+        color: #00363a;
+        text-decoration: none;
+    }
+    .restaurant:visited{
+        color: #00363a;
+        text-decoration: none;
+    }
+    .restaurant:hover{
+        color: darkred;
+    }
+    .restaurant-adress{
+        font-family: Monaco, sans-serif;
+        font-size: 15px;
+    }
+    .google-block{
+    }

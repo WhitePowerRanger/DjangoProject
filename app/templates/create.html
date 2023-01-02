@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ restaurant_name }}</title>
+</head>
+<body>
+<div class="features">
+    <h1>Add menu</h1>
+        <form method="post" class="post-form">
+            {% csrf_token %}
+            <div>
+                <h5>Choose food type</h5>
+                {{ meal_form.food_type }}
+            </div>
+            <div>
+                <h5>Type dish name</h5>
+                {{ meal_form.name }}
+            </div>
+            <div>
+                <h5>Type price</h5>
+                {{ meal_form.price }}
+            </div>
+            <div>
+                <label for="id_availability">Availability</label>
+                {{ meal_form.availability }}
+            </div>
+
+        <button type="submit" class="save btn btn-default">Save</button>
+    </form>
+</div>
+</body>
+</html>
