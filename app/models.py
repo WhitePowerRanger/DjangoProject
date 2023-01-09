@@ -2,7 +2,7 @@ from django.db import models
 
 
 class City(models.Model):
-    name = models.CharField(max_length=20, unique=True)
+    name = models.SlugField(max_length=20, unique=True)
 
     def __str__(self):
         return self.name
@@ -34,6 +34,9 @@ class FoodType(models.Model):
     def __str__(self):
         return self.food_type
 
+    def __hash__(self):
+        return hash(self.food_type)
+
 
 class Meal(models.Model):
     food_type = models.ForeignKey(FoodType, default=None, on_delete=models.CASCADE)
@@ -44,3 +47,5 @@ class Meal(models.Model):
     def __str__(self):
         return f"{self.food_type} - {self.name}"
 
+
+# todo: Add one more table with images for each meal, connect it with Foreignkey relations to Meal.name

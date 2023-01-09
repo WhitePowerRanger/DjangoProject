@@ -1,11 +1,12 @@
 from .forms import MealForm, MealFormSave, CreateUserForm
-from .models import City, Restaurant, RestaurantAdress
+from .models import City, Restaurant, RestaurantAdress, FoodType, Meal
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.db.models import QuerySet
 
-from .utils import create_google_maps_link
+from .utils import create_google_maps_link, sort_by_specified_order
 
 
 def register_page(request):
@@ -105,4 +106,24 @@ def order(request):
         },
     )
 
+
+def get_menu_for_given_restaurant(request, restaurant: str):
+    restaurant_obj = Restaurant.objects.get(name=restaurant)
+    food_types: QuerySet = FoodType.objects.filter(restaurant_id=restaurant_obj.id)
+    sorted_food_types = sort_by_specified_order(food_types)
+    menu = {}
+    for ft in sorted_food_types:
+        meals: QuerySet = Meal.objects.filter(food_type_id=ft.id)
+        sorted_meal = sorted(meals, key=lambda meal: meal.name)
+        pass
+        menu[ft] = sorted_meal
+
+    return render(
+        request,
+        "order_page/restaurant/order_restaurant.html",
+        context={
+            "restaurant_obj": restaurant_obj,
+            "menu": menu,
+        }
+    )
 

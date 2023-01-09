@@ -1,3 +1,30 @@
+import logging
+from typing import Dict
+from django.db.models import QuerySet
+
+from app.models import FoodType
+
+
+def sort_by_specified_order(food_types: QuerySet, order: Dict[str, int] = None):
+    if not order:
+        order = {
+                    "pizza": 0,
+                    "pasta": 1,
+                    "soup": 2,
+                    "salad": 3,
+                    "dessert": 4,
+                    "drink": 5,
+                }
+
+    def get_rank(ft: FoodType):
+        try:
+            rank = order[ft.food_type]
+        except KeyError:
+            logging.warning(f"Rank has not specified for {ft.food_type}. "
+                            f"It got one more that the biggest existed rank")
+            rank = max(order.values()) + 1
+        return rank
+    return sorted(food_types, key=get_rank)
 
 
 def create_google_maps_link(adress):

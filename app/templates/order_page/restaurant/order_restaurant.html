@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>MENU</title>
+</head>
+<body>
+    <div style="font-size: 60px; font-family: monospace; color: #121212">{{ restaurant_obj.name | capfirst }}</div>
+    {% for ft, meal_queryset in menu.items %}
+            <div style="font-size: 30px; font-family: monospace; color: red;">{{ ft.food_type }}</div>
+        {% for meal in meal_queryset %}
+            <div style="font-size: 15px; font-family: monospace; color: green;">{{ meal.name }}</div>
+            <div style="font-size: 15px; font-family: monospace; color: darkcyan;">{{ meal.price }}</div>
+
+            <br>
+        {% endfor %}
+        <hr style="border-top: 3px dashed #bbb;">
+    {% endfor %}
+</body>
+</html>

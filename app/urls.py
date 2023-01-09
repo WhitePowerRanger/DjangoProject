@@ -17,4 +17,8 @@ urlpatterns = [
             ]
         ),
     ),
+    path(
+        "order/<str:restaurant>", views.get_menu_for_given_restaurant
+    )
+
 ]

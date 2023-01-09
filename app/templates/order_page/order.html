@@ -15,7 +15,7 @@
         {% for restaurant, location in restaurants.items %}
             <div class="restaurant">
                 <div id="over">
-                <a href="http://127.0.0.1:8000/app/{{ city.name }}/{{ restaurant.name }}">{{ restaurant.name | capfirst }}</a>
+                <a href="http://127.0.0.1:8000/pizza/order/{{ restaurant.name | lower }}">{{ restaurant.name | capfirst }}</a>
 
                 {% for adress, google_link in location.items %}
                     <div class="icon-address"><img src="{% static 'img/order/icon_address.png' %}"></div>
