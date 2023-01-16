@@ -1,4 +1,5 @@
 import logging
+import re
 from typing import Dict
 from django.db.models import QuerySet
 
@@ -36,3 +37,19 @@ def create_google_maps_link(adress):
         f"https://maps.google.com/maps?q={street}%20{adress.building},"
         f"%20{adress.postal}%20{city}&t=&z=15&ie=UTF8&iwloc=&output=embed"
     )
+
+
+def get_modified_post_data(original_post):
+    def _modify_name(name):
+        result = []
+        for word in name.split():
+            if not word.isalpha():
+                regex = re.compile('[^a-zA-Z]')
+                result.append(regex.sub("", word).lower())
+            else:
+                result.append(word)
+        return "_".join(result)
+
+    temp_post = original_post.copy()
+    temp_post["name"] = _modify_name(temp_post["name"])
+    return temp_post

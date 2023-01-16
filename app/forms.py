@@ -10,10 +10,10 @@ class MealForm(ModelForm):
     # todo: прокидывать (*args, **kwargs) вместо restaurant_name
     def __init__(self, **kwargs):
         restaurant_name = kwargs.pop("restaurant_name")
-        restaurant = Restaurant.objects.get(restaurant_name=restaurant_name)
+        restaurant = Restaurant.objects.get(name=restaurant_name)
         super(MealForm, self).__init__()
         self.fields["food_type"].queryset = FoodType.objects.filter(
-            restaurant_name=restaurant.id
+            restaurant=restaurant.id
         )
 
     class Meta:

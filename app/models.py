@@ -1,4 +1,6 @@
 from django.db import models
+from pathlib import Path
+from DjangoProject.settings import STATIC_URL
 
 
 class City(models.Model):
@@ -34,9 +36,6 @@ class FoodType(models.Model):
     def __str__(self):
         return self.food_type
 
-    def __hash__(self):
-        return hash(self.food_type)
-
 
 class Meal(models.Model):
     food_type = models.ForeignKey(FoodType, default=None, on_delete=models.CASCADE)
@@ -47,5 +46,11 @@ class Meal(models.Model):
     def __str__(self):
         return f"{self.food_type} - {self.name}"
 
+    def modify_name(self):
+        pass
 
-# todo: Add one more table with images for each meal, connect it with Foreignkey relations to Meal.name
+
+# todo: to end implementation of model ImgStorage
+class ImgStorage(models.Model):
+    img_path = models.FilePathField(path=Path(STATIC_URL) / "img")
+    meal = models.ForeignKey(Meal, default=None, on_delete=models.CASCADE)

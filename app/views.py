@@ -1,3 +1,5 @@
+from typing import Dict, List
+
 from .forms import MealForm, MealFormSave, CreateUserForm
 from .models import City, Restaurant, RestaurantAdress, FoodType, Meal
 from django.shortcuts import render, redirect
@@ -6,7 +8,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.db.models import QuerySet
 
-from .utils import create_google_maps_link, sort_by_specified_order
+from .utils import create_google_maps_link, sort_by_specified_order, get_modified_post_data
 
 
 def register_page(request):
@@ -55,6 +57,7 @@ def get_main(request):
 def create_form(request, city_name, restaurant_name):
     error = None
     if request.method == "POST":
+        request.POST = get_modified_post_data(request.POST)
         form = MealFormSave(request.POST)
         if form.is_valid():
             form.save()
@@ -79,12 +82,12 @@ def get_all_city(request):
 
 
 def get_all_restaurants_for_specified_city(request, city_name):
-    city_obj = City.objects.get(city_name=city_name)
-    restaurants = Restaurant.objects.get(city_name_id=city_obj.id)
+    city_obj = City.objects.get(name=city_name)
+    restaurants = Restaurant.objects.get(city_id=city_obj.id)
     return render(
         request,
         "restaurant.html",
-        {"restaurants": restaurants, "city": city_obj.city_name},
+        {"restaurants": restaurants, "city": city_obj.name},
     )
 
 
@@ -115,9 +118,9 @@ def get_menu_for_given_restaurant(request, restaurant: str):
     for ft in sorted_food_types:
         meals: QuerySet = Meal.objects.filter(food_type_id=ft.id)
         sorted_meal = sorted(meals, key=lambda meal: meal.name)
-        pass
         menu[ft] = sorted_meal
-
+    copied_menu = menu.copy()
+    menu = to_handle(copied_menu)
     return render(
         request,
         "order_page/restaurant/order_restaurant.html",
@@ -127,3 +130,17 @@ def get_menu_for_given_restaurant(request, restaurant: str):
         }
     )
 
+
+def to_handle(menu: Dict[FoodType, List[Meal]]) -> Dict[FoodType, List[Meal]]:
+    def modify_name(name):
+        return name.replace("_", " ").title()
+
+    result_menu = {}
+    for ft, meal_list in menu.items():
+        ft.food_type = modify_name(ft.food_type)
+        meals = []
+        for meal in meal_list:
+            meal.name = modify_name(meal.name)
+            meals.append(meal)
+        result_menu[ft] = meals
+    return result_menu
