@@ -11,7 +11,7 @@ class City(models.Model):
 
 
 class Restaurant(models.Model):
-    city = models.ForeignKey(City, on_delete=models.CASCADE)
+    city = models.ForeignKey("City", on_delete=models.CASCADE)
     name = models.CharField(max_length=50, default=None)
 
     def __str__(self):
@@ -19,7 +19,7 @@ class Restaurant(models.Model):
 
 
 class RestaurantAdress(models.Model):
-    restaurant = models.ForeignKey(Restaurant, on_delete=models.CASCADE)
+    restaurant = models.ForeignKey("Restaurant", on_delete=models.CASCADE)
     city = models.CharField(max_length=50, default=None)
     postal = models.SlugField(max_length=6, default="00-000")
     street = models.CharField(max_length=100, default=None)
@@ -30,7 +30,7 @@ class RestaurantAdress(models.Model):
 
 
 class FoodType(models.Model):
-    restaurant = models.ForeignKey(Restaurant, on_delete=models.CASCADE)
+    restaurant = models.ForeignKey("Restaurant", on_delete=models.CASCADE)
     food_type = models.CharField(max_length=50, default=None)
 
     def __str__(self):
@@ -38,10 +38,11 @@ class FoodType(models.Model):
 
 
 class Meal(models.Model):
-    food_type = models.ForeignKey(FoodType, default=None, on_delete=models.CASCADE)
+    food_type = models.ForeignKey("FoodType", default=None, on_delete=models.CASCADE)
     name = models.CharField(max_length=50, default=None)
     price = models.PositiveIntegerField(default=0)
     available = models.BooleanField(default=False)
+    img = models.ForeignKey("ImgStorage", default=None, on_delete=models.SET_DEFAULT, null=True)
 
     def __str__(self):
         return f"{self.food_type} - {self.name}"
@@ -50,7 +51,6 @@ class Meal(models.Model):
         pass
 
 
-# todo: to end implementation of model ImgStorage
+# todo: to end implementation of model ImgStorage and do migrate
 class ImgStorage(models.Model):
     img_path = models.FilePathField(path=Path(STATIC_URL) / "img")
-    meal = models.ForeignKey(Meal, default=None, on_delete=models.CASCADE)

@@ -3,21 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <title>MENU</title>
+    <link rel="stylesheet" href="../../static/css/meal_img.css">
 </head>
+{% load static %}
 <div>
     {% include 'home_page/../navbar.html' %}
 </div>
-<body style="margin-left: 200px">
-    <div style="font-size: 60px; font-family: monospace; color: #121212">{{ restaurant_obj.name | capfirst }}</div>
-    {% for ft, meal_queryset in menu.items %}
-            <div style="font-size: 30px; font-family: monospace; color: red;">{{ ft.food_type }}</div>
-        {% for meal in meal_queryset %}
-            <div style="font-size: 15px; font-family: monospace; color: green;">{{ meal.name }}</div>
-            <div style="font-size: 15px; font-family: monospace; color: darkcyan;">{{ meal.price }}</div>
-
-            <br>
-        {% endfor %}
-        <hr style="border-top: 3px dashed #bbb;">
+<body class="body">
+        <div style="font-size: 100px; font-family: monospace; color: #121212">{{ restaurant_obj.name | capfirst }}</div>
+            {% for ft, meal_queryset in menu.items %}
+                <div style="font-size: 60px; font-family: monospace; color: red;">{{ ft.food_type }}</div>
+                {% for meal in meal_queryset %}
+                    <div id="one-meal">
+                        <div style="font-size: 40px; font-family: monospace; color: green;">{{ meal.0.name }}</div>
+                        <div style="font-size: 25px; font-family: monospace; color: darkcyan;">{{ meal.0.price }}</div>
+                        <br>
+                    </div>
+                        <div class="meal-img"><img src="{%  static meal.1.img_path %}" alt='meal-img'></div>
+                {% endfor %}
+    <hr style="border-top: 3px dashed #bbb;">
     {% endfor %}
 </body>
 </html>

@@ -1,14 +1,25 @@
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 from .forms import MealForm, MealFormSave, CreateUserForm
-from .models import City, Restaurant, RestaurantAdress, FoodType, Meal
+from .models import (
+    City,
+    Restaurant,
+    RestaurantAdress,
+    FoodType,
+    Meal,
+    ImgStorage,
+)
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.db.models import QuerySet
 
-from .utils import create_google_maps_link, sort_by_specified_order, get_modified_post_data
+from .utils import (
+    create_google_maps_link,
+    sort_by_specified_order,
+    get_modified_post_data,
+)
 
 
 def register_page(request):
@@ -98,7 +109,9 @@ def order(request):
         restaurant_obj = Restaurant.objects.get(city=city_obj.id)
         adress_obj = RestaurantAdress.objects.get(restaurant=restaurant_obj.id)
         google_link = create_google_maps_link(adress_obj)
-        cities_restaurants[city_obj] = {restaurant_obj: {adress_obj.__str__(): google_link}}
+        cities_restaurants[city_obj] = {
+            restaurant_obj: {adress_obj.__str__(): google_link}
+        }
         # cities_restaurants.setdefault(city_obj, []).append(restaurant_obj)
 
     return render(
@@ -110,37 +123,55 @@ def order(request):
     )
 
 
+def _return_imgstorage_obj_list(
+    sorted_meal: List[Meal],
+) -> List[ImgStorage]:  # Noqa
+    return [ImgStorage.objects.get(id=meal.img_id) for meal in sorted_meal]
+
+
 def get_menu_for_given_restaurant(request, restaurant: str):
     restaurant_obj = Restaurant.objects.get(name=restaurant)
-    food_types: QuerySet = FoodType.objects.filter(restaurant_id=restaurant_obj.id)
+    food_types: QuerySet = FoodType.objects.filter(
+        restaurant_id=restaurant_obj.id
+    )
     sorted_food_types = sort_by_specified_order(food_types)
+
     menu = {}
     for ft in sorted_food_types:
         meals: QuerySet = Meal.objects.filter(food_type_id=ft.id)
         sorted_meal = sorted(meals, key=lambda meal: meal.name)
-        menu[ft] = sorted_meal
+        menu[ft] = tuple(
+            zip(sorted_meal, _return_imgstorage_obj_list(sorted_meal))
+        )
+
     copied_menu = menu.copy()
-    menu = to_handle(copied_menu)
+    menu = to_handle(copied_menu)  # Noqa
+
     return render(
         request,
         "order_page/restaurant/order_restaurant.html",
         context={
             "restaurant_obj": restaurant_obj,
             "menu": menu,
-        }
+        },
     )
 
 
-def to_handle(menu: Dict[FoodType, List[Meal]]) -> Dict[FoodType, List[Meal]]:
+# todo: change the func name
+def to_handle(
+    menu: Dict[FoodType, Tuple[Tuple[Meal, ImgStorage]]]
+) -> Dict[FoodType, List[Tuple[Meal, ImgStorage]]]:
     def modify_name(name):
         return name.replace("_", " ").title()
 
     result_menu = {}
-    for ft, meal_list in menu.items():
+    for ft, meal_tuples in menu.items():
         ft.food_type = modify_name(ft.food_type)
         meals = []
-        for meal in meal_list:
+        for meal_img_tuple in meal_tuples:
+            meal = meal_img_tuple[0]
+            img = meal_img_tuple[1]
             meal.name = modify_name(meal.name)
-            meals.append(meal)
+            meals.append((meal, img))
         result_menu[ft] = meals
     return result_menu
