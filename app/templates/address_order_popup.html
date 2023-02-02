@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="https://code.jquery.com/jquery-3.6.3.js" integrity="sha256-nQLuAZGRRcILA+6dMBOvcRh5Pe310sBpanc6+QBmyVM=" crossorigin="anonymous"></script>
+    <title>Automatic Popup</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+    <!--Stylesheets-->
+    <style media="screen">
+
+      *,
+*:before,
+*:after{
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+body{
+    background-color: #0855ae;
+}
+.popup{
+    background-color: #ffffff;
+    width: 420px;
+    padding: 30px 40px;
+    position: absolute;
+    transform: translate(-50%,-50%);
+    left: 50%;
+    top: 50%;
+    border-radius: 8px;
+    font-family: "Poppins",sans-serif;
+    display: none;
+    text-align: center;
+}
+.popup button{
+    display: block;
+    margin:  0 0 20px auto;
+    background-color: transparent;
+    font-size: 30px;
+    color: #ffffff;
+    background: #03549a;
+    border-radius: 100%;
+    width: 40px;
+    height: 40px;
+    border: none;
+    outline: none;
+    cursor: pointer;
+}
+.popup h2{
+  margin-top: -20px;
+}
+.popup p{
+    font-size: 14px;
+    text-align: justify;
+    margin: 20px 0;
+    line-height: 25px;
+}
+.ok-button{
+    display: block;
+    width: 150px;
+    position: relative;
+    margin: 10px auto;
+    text-align: center;
+    background-color: #03549a;
+    border-radius: 20px;
+    color: #ffffff;
+    text-decoration: none;
+    padding: 8px 0;
+}
+input{
+    float: right
+}
+    </style>
+</head>
+
+<body>
+    <div class="popup">
+        <button id="close">&times;</button>
+        <h2>Check if your address is eligible</h2>
+        <form method="post" id="post-form" class="post-form">
+            {% csrf_token %}
+            <div>
+            <label for="street">Street: </label>
+            <input id="street" type="text" name="street">
+            </div>
+            <div>
+            <label for="suite">Suite: </label>
+            <input id="suite" type="text" name="suite">
+            </div>
+            <div>
+            <label for="postal-code">Postal Code: </label>
+            <input id="postal-code" type="text" name="postal-code">
+            </div>
+
+            <input class="ok-button" type="submit" value="OK">
+            </form>
+    </div>
+
+    <script type="text/javascript">
+window.addEventListener("load", function(){
+    setTimeout(
+        function open(event){
+            document.querySelector(".popup").style.display = "block";
+        },
+        2000
+    )
+});
+document.querySelector("#close").addEventListener("click", function(){
+    document.querySelector(".popup").style.display = "none";
+});
+    </script>
+    <script type="text/javascript">
+        $(document).on('submit', '#post-form', function (e){
+    e.preventDefault();
+    $.ajax({
+        type: 'POST',
+        url: "order-address",
+        data:{
+            street:$('#street').val(),
+            suite:$('#suite').val(),
+            postal:$('#postal-code').val(),
+
+            csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+        },
+        success: function (data){
+            $('h2').html(data);
+        }
+    });
+});
+    </script>
+</body>
+</html>

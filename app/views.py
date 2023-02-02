@@ -1,4 +1,4 @@
-from typing import Dict, List, Tuple
+from typing import List
 
 from .forms import MealForm, MealFormSave, CreateUserForm
 from .models import (
@@ -14,12 +14,18 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.db.models import QuerySet
+from django.http import HttpResponse
 
 from .utils import (
     create_google_maps_link,
     sort_by_specified_order,
     get_modified_post_data,
+    find_city_by_its_postal_code,
+    get_coordinates, shortest_route_time,
 )
+
+
+MINUTES_IN_HOUR = 60
 
 
 def register_page(request):
@@ -130,6 +136,7 @@ def _return_imgstorage_obj_list(
 
 
 def get_menu_for_given_restaurant(request, restaurant: str):
+
     restaurant_obj = Restaurant.objects.get(name=restaurant)
     food_types: QuerySet = FoodType.objects.filter(
         restaurant_id=restaurant_obj.id
@@ -157,21 +164,26 @@ def get_menu_for_given_restaurant(request, restaurant: str):
     )
 
 
-# todo: change the func name
-def to_handle(
-    menu: Dict[FoodType, Tuple[Tuple[Meal, ImgStorage]]]
-) -> Dict[FoodType, List[Tuple[Meal, ImgStorage]]]:
-    def modify_name(name):
-        return name.replace("_", " ").title()
+def check_if_address_eligible(request):
+    if request.method == "POST":
+        street = request.POST["street"]
+        suite = request.POST["suite"]
+        postal_code = request.POST["postal"]
+        city = find_city_by_its_postal_code(postal_code)
 
-    result_menu = {}
-    for ft, meal_tuples in menu.items():
-        ft.food_type = modify_name(ft.food_type)
-        meals = []
-        for meal_img_tuple in meal_tuples:
-            meal = meal_img_tuple[0]
-            img = meal_img_tuple[1]
-            meal.name = modify_name(meal.name)
-            meals.append((meal, img))
-        result_menu[ft] = meals
-    return result_menu
+        city_obj = City.objects.get(name=city)
+        restaurant_obj = Restaurant.objects.get(city=city_obj.id)
+        restaurant_address_obj = RestaurantAdress.objects.get(restaurant_id=restaurant_obj.id)
+
+        start_longitude, start_latitude = get_coordinates(restaurant_address_obj.street, restaurant_address_obj.building, restaurant_address_obj.city)
+        end_longitude, end_latitude = get_coordinates(street, suite, city)
+
+        duration = shortest_route_time(
+            (start_longitude, start_latitude),
+            (end_longitude, end_latitude)
+        )
+        response = "Unfortunately, we cannot deliver to given address"
+        if duration < MINUTES_IN_HOUR:
+            response = "It's okay, don't worry!"
+
+        return HttpResponse(response)

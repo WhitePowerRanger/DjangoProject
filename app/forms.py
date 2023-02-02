@@ -1,6 +1,12 @@
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from django.forms import ModelForm, TextInput, CheckboxInput, Select, ModelChoiceField
+from django.forms import (
+    ModelForm,
+    TextInput,
+    CheckboxInput,
+    Select,
+    ModelChoiceField,
+)
 
 from .models import Meal, City, Restaurant, FoodType
 from django import forms
@@ -117,3 +123,19 @@ class CreateUserForm(UserCreationForm):
     class Meta:
         model = User
         fields = ["username", "email", "password1", "password2"]
+
+
+class OrderAddressForm(forms.Form):
+    order_address = forms.SlugField(label="Order Address", max_length=100)
+
+    class Meta:
+        model = City
+        fields = "__all__"
+        widgets = {
+            "name": Select(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "City name",
+                }
+            )
+        }
