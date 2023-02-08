@@ -7,6 +7,7 @@ from django.db.models import QuerySet
 from app.models import FoodType, Meal, ImgStorage
 
 import pgeocode
+from config import settings
 
 COUNTY_CODE = "pl"
 
@@ -65,8 +66,7 @@ def get_modified_post_data(original_post):
     return temp_post
 
 
-# todo: change the func name
-def to_handle(
+def menu_builder(
     menu: Dict[FoodType, Tuple[Tuple[Meal, ImgStorage]]]
 ) -> Dict[FoodType, List[Tuple[Meal, ImgStorage]]]:
     def modify_name(name):
@@ -92,19 +92,30 @@ def find_city_by_its_postal_code(postal_code: str):
     return city
 
 
-# todo: сделать setting и вчитывать данные апи ключа с переменных
 def get_coordinates(street: str, suite: str, city: str) -> Tuple[float, float]:
     address = f"{street}%20{suite},%20{city}"
     r = requests.get(
-        f"https://api.openrouteservice.org/geocode/search?api_key=5b3ce3597851110001cf624883c2bf9b4f234780804e45657ca65fac&text={address}"
+        "https://api.openrouteservice.org/geocode/search?api_key=%s&text=%s"
+        % (
+            settings.OPENROUTSERVICE_API_KEY,
+            address,
+        ),
     )
     request_json = r.json()
     return request_json["features"][0]["geometry"]["coordinates"]
 
 
 def shortest_route_time(start: Tuple[float, float], end: Tuple[float, float]):
+    start_lon, start_lat, end_lon, end_lat = start[0], start[1], end[0], end[1]
     r = requests.get(
-        f"https://api.openrouteservice.org/v2/directions/driving-car?api_key=5b3ce3597851110001cf624883c2bf9b4f234780804e45657ca65fac&start={start[0]},{start[1]}&end={end[0]},{end[1]}"
+        "https://api.openrouteservice.org/v2/directions/driving-car?api_key=%s&start=%s,%s&end=%s,%s"
+        % (
+            settings.OPENROUTSERVICE_API_KEY,
+            start_lon,
+            start_lat,
+            end_lon,
+            end_lat,
+        )
     )
     request_json = r.json()
     duration = request_json["features"][0]["properties"]["summary"]["duration"]

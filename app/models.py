@@ -38,11 +38,15 @@ class FoodType(models.Model):
 
 
 class Meal(models.Model):
-    food_type = models.ForeignKey("FoodType", default=None, on_delete=models.CASCADE)
+    food_type = models.ForeignKey(
+        "FoodType", default=None, on_delete=models.CASCADE
+    )
     name = models.CharField(max_length=50, default=None)
     price = models.PositiveIntegerField(default=0)
     available = models.BooleanField(default=False)
-    img = models.ForeignKey("ImgStorage", default=None, on_delete=models.SET_DEFAULT, null=True)
+    img = models.ForeignKey(
+        "ImgStorage", default=None, on_delete=models.SET_DEFAULT, null=True
+    )
 
     def __str__(self):
         return f"{self.food_type} - {self.name}"
@@ -51,6 +55,5 @@ class Meal(models.Model):
         pass
 
 
-# todo: to end implementation of model ImgStorage and do migrate
 class ImgStorage(models.Model):
     img_path = models.FilePathField(path=Path(STATIC_URL) / "img")

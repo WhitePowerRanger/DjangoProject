@@ -15,13 +15,16 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.db.models import QuerySet
 from django.http import HttpResponse
+from django.core.exceptions import MultipleObjectsReturned
 
 from .utils import (
     create_google_maps_link,
     sort_by_specified_order,
     get_modified_post_data,
     find_city_by_its_postal_code,
-    get_coordinates, shortest_route_time,
+    get_coordinates,
+    shortest_route_time,
+    menu_builder,
 )
 
 
@@ -95,12 +98,14 @@ def get_all_city(request):
     return render(request, "cities.html", {"cities": cities})
 
 
-# todo: refactor. In case if restaurants with the same city_obj.id will be more that 1, need to have a list of it.
-
-
+# I assume, that there won't be more, that 1 restaurant for each city
+# Handled MultipleObjectsReturned error only just as clean code practice
 def get_all_restaurants_for_specified_city(request, city_name):
     city_obj = City.objects.get(name=city_name)
-    restaurants = Restaurant.objects.get(city_id=city_obj.id)
+    try:
+        restaurants = Restaurant.objects.get(city_id=city_obj.id)
+    except MultipleObjectsReturned:
+        restaurants = Restaurant.objects.filter(city_id=city_obj.id).first()
     return render(
         request,
         "restaurant.html",
@@ -131,7 +136,7 @@ def order(request):
 
 def _return_imgstorage_obj_list(
     sorted_meal: List[Meal],
-) -> List[ImgStorage]:  # Noqa
+) -> List[ImgStorage]:
     return [ImgStorage.objects.get(id=meal.img_id) for meal in sorted_meal]
 
 
@@ -152,7 +157,7 @@ def get_menu_for_given_restaurant(request, restaurant: str):
         )
 
     copied_menu = menu.copy()
-    menu = to_handle(copied_menu)  # Noqa
+    menu = menu_builder(copied_menu)  # noqa
 
     return render(
         request,
@@ -173,14 +178,19 @@ def check_if_address_eligible(request):
 
         city_obj = City.objects.get(name=city)
         restaurant_obj = Restaurant.objects.get(city=city_obj.id)
-        restaurant_address_obj = RestaurantAdress.objects.get(restaurant_id=restaurant_obj.id)
+        restaurant_address_obj = RestaurantAdress.objects.get(
+            restaurant_id=restaurant_obj.id
+        )
 
-        start_longitude, start_latitude = get_coordinates(restaurant_address_obj.street, restaurant_address_obj.building, restaurant_address_obj.city)
-        end_longitude, end_latitude = get_coordinates(street, suite, city)
+        start_lon, start_lat = get_coordinates(
+            restaurant_address_obj.street,
+            restaurant_address_obj.building,
+            restaurant_address_obj.city,
+        )
+        end_lon, end_lat = get_coordinates(street, suite, city)
 
         duration = shortest_route_time(
-            (start_longitude, start_latitude),
-            (end_longitude, end_latitude)
+            (start_lon, start_lat), (end_lon, end_lat)
         )
         response = "Unfortunately, we cannot deliver to given address"
         if duration < MINUTES_IN_HOUR:
