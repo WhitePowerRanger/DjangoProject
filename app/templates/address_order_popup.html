@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="https://code.jquery.com/jquery-3.6.3.js" integrity="sha256-nQLuAZGRRcILA+6dMBOvcRh5Pe310sBpanc6+QBmyVM=" crossorigin="anonymous"></script>
     <title>Automatic Popup</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
     <!--Stylesheets-->
@@ -74,7 +73,7 @@ input{
 <body>
     <div class="popup">
         <button id="close">&times;</button>
-        <h2>Check if your address is eligible</h2>
+        <h2 id="popup-title">Check if your address is eligible</h2>
         <form method="post" id="post-form" class="post-form">
             {% csrf_token %}
             <div>
@@ -108,23 +107,26 @@ document.querySelector("#close").addEventListener("click", function(){
 });
     </script>
     <script type="text/javascript">
-        $(document).on('submit', '#post-form', function (e){
-    e.preventDefault();
-    $.ajax({
-        type: 'POST',
-        url: "order-address",
-        data:{
-            street:$('#street').val(),
-            suite:$('#suite').val(),
-            postal:$('#postal-code').val(),
-
-            csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
-        },
-        success: function (data){
-            $('h2').html(data);
+        function findElement (selector) {
+            return document.querySelector(selector)
         }
-    });
-});
+        findElement('#post-form').addEventListener('submit', function (e) {
+            e.preventDefault()
+
+            var payload = new  FormData()
+
+            payload.set('street', findElement('#street').value)
+            payload.set('suite', findElement('#suite').value)
+            payload.set('postal', findElement('#postal-code').value)
+            payload.set('csrfmiddlewaretoken', findElement('input[name=csrfmiddlewaretoken]').value)
+
+            fetch('order-address', {
+                method: 'POST',
+                body: payload
+            })
+                .then((res) => res.text())
+                .then((res) => findElement('#popup-title').innerText = res)
+        });
     </script>
 </body>
 </html>
