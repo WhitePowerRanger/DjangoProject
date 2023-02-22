@@ -105,7 +105,7 @@ def get_all_restaurants_for_specified_city(request, city_name):
     try:
         restaurants = Restaurant.objects.get(city_id=city_obj.id)
     except MultipleObjectsReturned:
-        restaurants = Restaurant.objects.filter(city_id=city_obj.id).first()
+        restaurants = Restaurant.objects.get(city_id=city_obj.id)[0]
     return render(
         request,
         "restaurant.html",
